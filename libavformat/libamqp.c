@@ -34,6 +34,7 @@ typedef struct AMQPContext {
     const AVClass *class;
     amqp_connection_state_t conn;
     amqp_socket_t *socket;
+    const char *vhost;
     const char *exchange;
     const char *routing_key;
     int pkt_size;
@@ -50,6 +51,7 @@ typedef struct AMQPContext {
 #define E AV_OPT_FLAG_ENCODING_PARAM
 static const AVOption options[] = {
     { "pkt_size", "Maximum send/read packet size", OFFSET(pkt_size), AV_OPT_TYPE_INT, { .i64 = 131072 }, 4096, INT_MAX, .flags = D | E },
+    { "vhost", "vhost to send/read packets", OFFSET(vhost), AV_OPT_TYPE_STRING, { .str = "/" }, 0, 0, .flags = D | E },
     { "exchange", "Exchange to send/read packets", OFFSET(exchange), AV_OPT_TYPE_STRING, { .str = "amq.direct" }, 0, 0, .flags = D | E },
     { "routing_key", "Key to filter streams", OFFSET(routing_key), AV_OPT_TYPE_STRING, { .str = "amqp" }, 0, 0, .flags = D | E },
     { "connection_timeout", "Initial connection timeout", OFFSET(connection_timeout), AV_OPT_TYPE_DURATION, { .i64 = -1 }, -1, INT64_MAX, .flags = D | E},
@@ -136,7 +138,7 @@ static int amqp_proto_open(URLContext *h, const char *uri, int flags)
         goto destroy_connection;
     }
 
-    broker_reply = amqp_login(s->conn, "/", 0, s->pkt_size, 0,
+    broker_reply = amqp_login(s->conn, s->vhost, 0, s->pkt_size, 0,
                               AMQP_SASL_METHOD_PLAIN, user_decoded, password_decoded);
 
     if (broker_reply.reply_type != AMQP_RESPONSE_NORMAL) {

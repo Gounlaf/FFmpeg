@@ -84,6 +84,9 @@ The following options are supported:
 
 @table @option
 
+@item vhost
+Sets the vhost to use on the broker. Default is "/".
+
 @item exchange
 Sets the exchange to use on the broker. RabbitMQ has several predefined
 exchanges: "amq.direct" is the default exchange, where the publisher and
